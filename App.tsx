@@ -1,9 +1,9 @@
 import { NativeBaseProvider } from 'native-base';
-import { StatusBar, Text } from 'react-native';
+import { StatusBar } from 'react-native';
 import {
   useFonts,
-  Roboto_400Regular,
   Roboto_700Bold,
+  Roboto_400Regular,
 } from '@expo-google-fonts/roboto';
 
 import { Loading } from '@components/Loading';
