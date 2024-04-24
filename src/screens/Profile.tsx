@@ -1,23 +1,71 @@
 import React, { useState } from 'react';
+import * as FileSystem from 'expo-file-system';
 import { TouchableOpacity } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import {
-  Center,
-  Heading,
-  ScrollView,
-  Skeleton,
   Text,
+  Center,
   VStack,
+  Heading,
+  Skeleton,
+  useToast,
+  ScrollView,
 } from 'native-base';
 
-import { UserPhoto } from '@components/UserPhoto';
-import { ScreenHeader } from '@components/ScreenHeader';
 import { Input } from '@components/Input';
 import { Button } from '@components/Button';
+import { UserPhoto } from '@components/UserPhoto';
+import { ScreenHeader } from '@components/ScreenHeader';
 
 const PHOTO_SIZE = 32;
 
 export function Profile() {
-  const [photoIsLoading, setPhotoIsLoading] = useState(true);
+  const toast = useToast();
+
+  const [userPhoto, setUserPhoto] = useState(
+    'https://github.com/davidscabral02.png'
+  );
+  const [photoIsLoading, setPhotoIsLoading] = useState(false);
+
+  async function handleUserPhotoSelect() {
+    setPhotoIsLoading(true);
+    try {
+      const photoSelected = await ImagePicker.launchImageLibraryAsync({
+        quality: 1,
+        aspect: [4, 4],
+        allowsEditing: true,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      });
+
+      if (photoSelected.canceled) {
+        return;
+      }
+
+      if (photoSelected.assets[0].uri) {
+        const photoInfo = await FileSystem.getInfoAsync(
+          photoSelected.assets[0].uri
+        );
+        if (
+          photoInfo.exists &&
+          photoInfo.size &&
+          photoInfo.size / 1024 / 1024 > 5
+        ) {
+          return toast.show({
+            title: 'Essa imagem é muito grande. Escolha uma imagem de até 5mb',
+            placement: 'top',
+            bgColor: 'red.500',
+          });
+        }
+
+        setUserPhoto(photoSelected.assets[0].uri);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setPhotoIsLoading(false);
+    }
+  }
+
   return (
     <VStack flex={1}>
       <ScreenHeader title="Perfil" />
@@ -28,17 +76,17 @@ export function Profile() {
               w={PHOTO_SIZE}
               h={PHOTO_SIZE}
               rounded="full"
-              startColor="gray.400"
               endColor="gray.300"
+              startColor="gray.400"
             />
           ) : (
             <UserPhoto
               size={PHOTO_SIZE}
               alt="Foto do usuário"
-              source={{ uri: 'https://github.com/davidscabral02.png' }}
+              source={{ uri: userPhoto }}
             />
           )}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleUserPhotoSelect}>
             <Text
               mt={4}
               mb={8}

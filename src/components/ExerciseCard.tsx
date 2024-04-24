@@ -20,7 +20,7 @@ export function ExerciseCard({ ...rest }: Props) {
           h={16}
           mr={4}
           rounded="md"
-          resizeMode="center"
+          resizeMode="cover"
           alt="Imagem do Exercício"
           source={{ uri: 'https://github.com/davidscabral02.png' }}
         />
